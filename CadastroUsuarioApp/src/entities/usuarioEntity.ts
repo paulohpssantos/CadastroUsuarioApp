@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { EnderecoEntity } from './enderecoEntity';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+
 
 @Entity('usuario')
 export class UsuarioEntity {
@@ -19,7 +19,25 @@ export class UsuarioEntity {
     @Column()
     email!: string;
 
-    @OneToMany(() => EnderecoEntity, endereco => endereco.usuario, { cascade: true })
-    enderecos!: EnderecoEntity[];
+    @Column()
+    logradouro!: string;
+
+    @Column()
+    numero!: string;
+
+    @Column()
+    bairro!: string;
+
+    @Column()
+    cep!: string;
+
+    @Column()
+    uf!: string;
+
+    @Column()
+    cidade!: string;
+
+    @Column()
+    complemento!: string;
 
 }

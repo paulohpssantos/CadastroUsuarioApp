@@ -1,24 +1,35 @@
 import { useEffect, useState } from "react";
 
 import { UsuarioEntity } from "../src/entities/usuarioEntity";
-import { EnderecoEntity } from "../src/entities/enderecoEntity";
 import { UsuarioService } from "../src/services/usuarioService";
-import { EnderecoService } from "../src/services/enderecoService";
+
 
 
 export function useUsuarios() {
   const [usuarios, setUsuarios] = useState<UsuarioEntity[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   async function load() {
-    const data = await UsuarioService.list();
-    setUsuarios(data);
+    setLoading(true);
+    try {
+      const data = await UsuarioService.list();
+      setUsuarios(data);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  async function add(nome: string, telefone: string, senha: string, email: string, enderecos?: Partial<EnderecoEntity>[]) {
+  async function add(payload: Partial<UsuarioEntity> ) {
+        try {
+            const novo = await UsuarioService.create(payload);
+            await load();
+            return novo;
+        } catch (err) {
+            console.error('Erro ao salvar usuario', err);
+            throw err;
+        }
+    }
 
-    await UsuarioService.create(nome, telefone, senha, email, enderecos);
-    await load();
-  }
 
   async function remove(id: number) {
     await UsuarioService.remove(id);
@@ -29,5 +40,5 @@ export function useUsuarios() {
     load();
   }, []);
 
-  return { usuarios, add, remove };
+  return { usuarios, add, remove, load, loading };
 }
