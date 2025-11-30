@@ -1,44 +1,88 @@
 import { useEffect, useState } from "react";
 
-import { UsuarioEntity } from "../src/entities/usuarioEntity";
-import { UsuarioService } from "../src/services/usuarioService";
+import {
+  criarUsuario,
+  listarUsuarios,
+  buscarUsuario,
+  atualizarUsuario,
+  deletarUsuario
+} from "../src/services/usuarioService";
 
+import {
+  criarEndereco,
+  buscarEnderecoPorUsuario,
+  atualizarEndereco,
+  deletarEndereco
+} from "../src/services/enderecoService";
 
+import { Usuario } from "../src/models/usuario";
+import { Endereco } from "../src/models/endereco";
 
-export function useUsuarios() {
-  const [usuarios, setUsuarios] = useState<UsuarioEntity[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+export function useUsuario() {
+  const [usuarios, setUsuarios] = useState<any[]>([]);
+  const [carregando, setCarregando] = useState(true);
 
-  async function load() {
-    setLoading(true);
-    try {
-      const data = await UsuarioService.list();
-      setUsuarios(data);
-    } finally {
-      setLoading(false);
+  const carregar = async () => {
+    setCarregando(true);
+
+    const lista = await listarUsuarios();
+
+    const resultado = [];
+    for (const u of lista) {
+      const end = await buscarEnderecoPorUsuario(u.id!);
+      resultado.push({ usuario: u, endereco: end });
     }
-  }
 
-  async function add(payload: Partial<UsuarioEntity> ) {
-        try {
-            const novo = await UsuarioService.create(payload);
-            await load();
-            return novo;
-        } catch (err) {
-            console.error('Erro ao salvar usuario', err);
-            throw err;
-        }
+    setUsuarios(resultado);
+    setCarregando(false);
+  };
+
+  const adicionar = async (usuario: Usuario, endereco: Endereco) => {
+    await criarUsuario(usuario);
+
+    const lista = await listarUsuarios();
+    const ultimo = lista[lista.length - 1];
+
+    if (!ultimo || typeof ultimo.id !== 'number') {
+      throw new Error('Não foi possível localizar o usuário criado');
     }
 
+    const usuarioId: number = ultimo.id;
 
-  async function remove(id: number) {
-    await UsuarioService.remove(id);
-    await load();
-  }
+    await criarEndereco({
+      ...endereco,
+      usuarioId
+    });
 
-  useEffect(() => {
-    load();
-  }, []);
+    await carregar();
+  };
 
-  return { usuarios, add, remove, load, loading };
+  const atualizar = async (id: number, usuarioData: Usuario, enderecoData: Endereco) => {
+    await atualizarUsuario(id, usuarioData);
+
+    const end = await buscarEnderecoPorUsuario(id);
+    if (end) {
+      await atualizarEndereco(end.id!, enderecoData);
+    }
+
+    await carregar();
+  };
+
+  const remover = async (id: number) => {
+    const end = await buscarEnderecoPorUsuario(id);
+    if (end) {
+      await deletarEndereco(end.id!);
+    }
+    await deletarUsuario(id);
+    await carregar();
+  };
+
+  return {
+    usuarios,
+    carregando,
+    adicionar,
+    atualizar,
+    remover,
+    recarregar: carregar
+  };
 }

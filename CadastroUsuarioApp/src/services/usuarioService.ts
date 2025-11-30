@@ -1,15 +1,25 @@
-import { UsuarioRepository } from "../repositories/usuarioRepository";
-import { EnderecoEntity } from "../entities/enderecoEntity";
-import { UsuarioEntity } from "../entities/usuarioEntity";
+import { db } from "../db/drizzle";
+import { usuario } from "../db/schemas";
+import { eq } from "drizzle-orm";
+import { Usuario } from "../models/usuario";
 
-const repo = new UsuarioRepository();
+export const criarUsuario = async (data: Usuario) => {
+  await db.insert(usuario).values(data);
+};
 
-export const UsuarioService = {
-    create: async (payload: Partial<UsuarioEntity> ) => {
-        return repo.create(payload);
-    },
+export const listarUsuarios = async (): Promise<Usuario[]> => {
+  return await db.select().from(usuario);
+};
 
-    list: async () => repo.findAll(),
-    remove: async (id: number) => repo.delete(id),
-    update: async (id: number, patch: Partial<UsuarioEntity>) => repo.update ? repo.update(id, patch) : null,
+export const buscarUsuario = async (id: number): Promise<Usuario | null> => {
+  const result = await db.select().from(usuario).where(eq(usuario.id, id));
+  return result[0] ?? null;
+};
+
+export const atualizarUsuario = async (id: number, data: Usuario) => {
+  await db.update(usuario).set(data).where(eq(usuario.id, id));
+};
+
+export const deletarUsuario = async (id: number) => {
+  await db.delete(usuario).where(eq(usuario.id, id));
 };

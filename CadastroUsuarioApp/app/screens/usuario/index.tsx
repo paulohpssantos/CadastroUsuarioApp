@@ -1,4 +1,6 @@
-import { useUsuarios } from '../../../hooks/use-usuario';
+import { useUsuario } from '../../../hooks/use-usuario';
+import { Usuario } from "../../../src/models/usuario";
+import { Endereco } from "../../../src/models/endereco";
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React from 'react';
@@ -6,22 +8,23 @@ import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { Button, Card, IconButton, Provider as PaperProvider } from 'react-native-paper';
 import colors from "../../../constants/colors";
 import globalStyles from '../../../constants/globalStyles';
-import { UsuarioEntity } from "@/src/entities/usuarioEntity";
+import { formatCelular } from '../../../src/utils/functions';
+
 
 
 
 export default function UsuariosScreen() {
   const router = useRouter();
-  const { usuarios, loading, load, remove } = useUsuarios();
+  const { usuarios, carregando, recarregar, remover } = useUsuario();
 
     useFocusEffect(
     React.useCallback(() => {
-        load();
+        recarregar();
     }, [])
     );
 
   
-  function renderCard(usuario: UsuarioEntity) {
+  function renderCard(usuario: Usuario, endereco: Endereco) {
     const handleDelete = () => {
       Alert.alert(
         'Confirmar exclusão',
@@ -34,7 +37,7 @@ export default function UsuariosScreen() {
             onPress: async () => {
               try {
                 if (usuario.id) {
-                  await remove(usuario.id);
+                  await remover(usuario.id);
                 } else {
                   Alert.alert('Erro', 'ID do usuário inválido.');
                 }
@@ -55,17 +58,13 @@ export default function UsuariosScreen() {
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.text, marginBottom: 2 }}>{usuario.nome}</Text>
-            <TouchableOpacity activeOpacity={0.7}>
-              <Text style={{ color: colors.secondary, fontWeight: '600', fontSize: 15, marginBottom: 2, borderColor: colors.border, borderWidth: 1, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 }}>
-                {usuario.email}
-              </Text>
-            </TouchableOpacity>
+            
           </View>
           <View style={{ flexDirection: 'row', gap: 2 }}>
             <IconButton
               icon="pencil-outline"
               size={22}
-              onPress={() => router.push({ pathname: '/screens/usuarios/cadastro', params: { cliente: JSON.stringify(usuario) } } as any)}
+              onPress={() => router.push({ pathname: '/usuario/cadastro', params: { cliente: JSON.stringify(usuario) } } as any)}
             />
             <IconButton icon="delete-outline" size={22} onPress={handleDelete} />
           </View>
@@ -73,7 +72,7 @@ export default function UsuariosScreen() {
         <View style={{ borderTopWidth: 1, borderColor: '#f0f0f0', padding: 16, paddingTop: 10 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
             <MaterialCommunityIcons name="phone-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
-            <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">{usuario.telefone}</Text>
+            <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">{formatCelular(usuario.telefone ?? '')}</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
             <MaterialCommunityIcons name="email-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
@@ -82,7 +81,12 @@ export default function UsuariosScreen() {
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
             <MaterialCommunityIcons name="map-marker-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
             <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">
-              {`${usuario.logradouro ?? ''}${usuario.numero ? ', ' + usuario.numero : ''}${usuario.bairro ? ' - ' + usuario.bairro : ''}`}
+              {`${endereco.logradouro ?? ''}${endereco.numero ? ', ' + endereco.numero : ''}${endereco.bairro ? ' - ' + endereco.bairro : ''}`}
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6, paddingStart: 24 }}>
+            <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">
+              {`${endereco.cidade ?? ''}${endereco.uf ? '/' + endereco.uf : ''}`}
             </Text>
           </View>
           {}
@@ -95,7 +99,7 @@ export default function UsuariosScreen() {
     <PaperProvider>
       <View style={globalStyles.container}>
         <View style={{ height: 18 }} />
-        {loading ? (
+        {carregando ? (
           <Text style={{ textAlign: 'center', marginTop: 30 }}>Carregando...</Text>
         ) : (
           <FlatList
@@ -103,7 +107,7 @@ export default function UsuariosScreen() {
             contentContainerStyle={{ paddingBottom: 80 }}
             data={usuarios}
             keyExtractor={(item, idx) => String((item as any)?.id ?? idx)}
-            renderItem={({ item }) => renderCard(item)}
+            renderItem={({ item }) => renderCard(item.usuario, item.endereco)}
             ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 30 }}>Nenhum cliente encontrado.</Text>}
             showsVerticalScrollIndicator={false}
           />
@@ -113,9 +117,9 @@ export default function UsuariosScreen() {
         <Button
           mode="contained"
           icon="plus"
-          onPress={() => router.push({ pathname: '/screens/usuarios/cadastro' } as any)}
+          onPress={() => router.push({ pathname: '/usuario/cadastro' } as any)}
           style={globalStyles.primaryButton}>
-          Novo Cliente
+          Novo Usuário
         </Button>
       </View>
     </PaperProvider>
