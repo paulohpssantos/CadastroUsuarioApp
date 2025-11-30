@@ -13,6 +13,10 @@ export function validaSenha(senha: string): boolean {
   return senha.length >= 6;
 }
 
+export function validaCEP(cep: string): boolean {
+  return cep.length === 8;
+}
+
 export function formatCEP(value: string) {
   const digits = value.replace(/\D/g, '');
   return digits.replace(/^(\d{5})(\d{3}).*/, '$1-$2');

@@ -57,12 +57,16 @@ export function useUsuario() {
     await carregar();
   };
 
-  const atualizar = async (id: number, usuarioData: Usuario, enderecoData: Endereco) => {
+  const atualizar = async (id: number, usuarioData: Usuario, enderecoData: Partial<Endereco>) => {
     await atualizarUsuario(id, usuarioData);
 
     const end = await buscarEnderecoPorUsuario(id);
     if (end) {
-      await atualizarEndereco(end.id!, enderecoData);
+      const dataToUpdate: any = { ...enderecoData };
+      delete dataToUpdate.usuarioId;
+      await atualizarEndereco(end.id!, dataToUpdate as Endereco);
+    } else {
+      await criarEndereco({ ...(enderecoData as Endereco), usuarioId: id });
     }
 
     await carregar();

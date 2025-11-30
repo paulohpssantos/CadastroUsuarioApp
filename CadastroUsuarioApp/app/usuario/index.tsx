@@ -1,14 +1,15 @@
-import { useUsuario } from '../../../hooks/use-usuario';
-import { Usuario } from "../../../src/models/usuario";
-import { Endereco } from "../../../src/models/endereco";
+import { useUsuario } from '../../hooks/use-usuario';
+import { Usuario } from "../../src/models/usuario";
+import { Endereco } from "../../src/models/endereco";
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React from 'react';
-import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Card, IconButton, Provider as PaperProvider } from 'react-native-paper';
-import colors from "../../../constants/colors";
-import globalStyles from '../../../constants/globalStyles';
-import { formatCelular } from '../../../src/utils/functions';
+import colors from "../../constants/colors";
+import globalStyles from '../../constants/globalStyles';
+import { formatCelular } from '../../src/utils/functions';
 
 
 
@@ -24,7 +25,7 @@ export default function UsuariosScreen() {
     );
 
   
-  function renderCard(usuario: Usuario, endereco: Endereco) {
+  function renderCard(usuario: Usuario, endereco?: Endereco | null) {
     const handleDelete = () => {
       Alert.alert(
         'Confirmar exclusão',
@@ -64,7 +65,15 @@ export default function UsuariosScreen() {
             <IconButton
               icon="pencil-outline"
               size={22}
-              onPress={() => router.push({ pathname: '/usuario/cadastro', params: { cliente: JSON.stringify(usuario) } } as any)}
+              onPress={() => {
+                try {
+                  const u = encodeURIComponent(JSON.stringify(usuario));
+                  const e = encodeURIComponent(JSON.stringify(endereco ?? {}));
+                  router.push((`/usuario/cadastro?usuario=${u}&endereco=${e}`) as any);
+                } catch (err) {
+                  router.push('/usuario/cadastro' as any);
+                }
+              }}
             />
             <IconButton icon="delete-outline" size={22} onPress={handleDelete} />
           </View>
@@ -78,17 +87,26 @@ export default function UsuariosScreen() {
             <MaterialCommunityIcons name="email-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
             <Text style={{ color: colors.text, fontSize: 15 }}>{usuario.email}</Text>
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-            <MaterialCommunityIcons name="map-marker-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
-            <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">
-              {`${endereco.logradouro ?? ''}${endereco.numero ? ', ' + endereco.numero : ''}${endereco.bairro ? ' - ' + endereco.bairro : ''}`}
-            </Text>
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6, paddingStart: 24 }}>
-            <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">
-              {`${endereco.cidade ?? ''}${endereco.uf ? '/' + endereco.uf : ''}`}
-            </Text>
-          </View>
+          {endereco ? (
+            <>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                <MaterialCommunityIcons name="map-marker-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+                <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">
+                  {`${endereco.logradouro ?? ''}${endereco.numero ? ', ' + endereco.numero : ''}${endereco.bairro ? ' - ' + endereco.bairro : ''}`}
+                </Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6, paddingStart: 24 }}>
+                <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">
+                  {`${endereco.cidade ?? ''}${endereco.uf ? '/' + endereco.uf : ''}`}
+                </Text>
+              </View>
+            </>
+          ) : (
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+              <MaterialCommunityIcons name="map-marker-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+              <Text style={{ color: colors.text, fontSize: 15, flex: 1 }} numberOfLines={1} ellipsizeMode="tail">Endereço não informado</Text>
+            </View>
+          )}
           {}
         </View>
       </Card>
@@ -97,7 +115,8 @@ export default function UsuariosScreen() {
 
   return (
     <PaperProvider>
-      <View style={globalStyles.container}>
+      <SafeAreaView style={globalStyles.container}>
+        <Text style={[globalStyles.title, { alignSelf: 'center' }]}>Usuários Cadastrados</Text>
         <View style={{ height: 18 }} />
         {carregando ? (
           <Text style={{ textAlign: 'center', marginTop: 30 }}>Carregando...</Text>
@@ -112,12 +131,12 @@ export default function UsuariosScreen() {
             showsVerticalScrollIndicator={false}
           />
         )}
-      </View>
+  </SafeAreaView>
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, backgroundColor: '#fff', borderTopWidth: 0.5, borderColor: '#eee', flexDirection: 'row', justifyContent: 'center', gap: 12 }}>
         <Button
           mode="contained"
           icon="plus"
-          onPress={() => router.push({ pathname: '/usuario/cadastro' } as any)}
+          onPress={() => router.push('/usuario/cadastro' as any)}
           style={globalStyles.primaryButton}>
           Novo Usuário
         </Button>
