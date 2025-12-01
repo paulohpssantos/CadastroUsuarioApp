@@ -1,50 +1,102 @@
-# Welcome to your Expo app 👋
+# CadastroUsuarioApp
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Descrição do projeto
 
-## Get started
+CadastroUsuarioApp é um aplicativo de exemplo (mobile/web) para cadastro e gerenciamento de usuários e seus endereços. O projeto usa Expo e React Native para a interface e inclui serviços locais para CRUD de usuários e endereços, além de hooks React para encapsular a lógica de negócio (por exemplo, `use-usuario`).
 
-1. Install dependencies
+## Tecnologias utilizadas
 
-   ```bash
-   npm install
-   ```
+- Expo (54)
+- React 19.1.0
+- React Native 0.81.5
+- TypeScript
+- Drizzle ORM (para manipulação de dados locais/SQLite)
+- Axios (requisições HTTP)
+- react-native-paper (componentes UI)
+- @react-navigation (navegação)
+- react-native-reanimated, gesture-handler, safe-area-context
+- Bibliotecas de teste: Jest, @testing-library/react-native, react-test-renderer
 
-2. Start the app
 
-   ```bash
-   npx expo start
-   ```
+## Instruções de instalação
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+1. Clone o repositório:
 
 ```bash
-npm run reset-project
+git clone <repo-url>
+cd CadastroUsuarioApp
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Instale dependências (recomendo Node.js LTS e npm v8+/v9+):
 
-## Learn more
+```bash
+npm install
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## Instruções de execução
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- Rodar em desenvolvimento (Expo):
 
-## Join the community
+```bash
+npm start
+```
 
-Join our community of developers creating universal apps.
+- Rodar no emulador iOS/Android (requer ambiente configurado):
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npm run ios
+npm run android
+```
+
+- Rodar no web (Expo web):
+
+```bash
+npm run web
+```
+
+- Rodar a suíte de testes com Jest:
+
+```bash
+npm test
+```
+
+Se quiser rodar apenas um arquivo de teste especifico:
+
+```bash
+npx jest path/to/test -i
+```
+
+## Decisões técnicas tomadas
+
+- Expo + React Native: facilidade de setup multiplataforma, hot-reload e integração com ferramentas mobile/web.
+- Drizzle ORM: escolhida para organizar acessos a banco local (SQLite no qual já conheço bem a arquitetura) com tipos e migrations mais fáceis.
+- Arquitetura: separar serviços (`src/services/*`) para a camada de persistência/integração e hooks (`hooks/use-usuario.ts`) para lógica reaproveitável na UI.
+- Testes: usar `@testing-library/react-native` e Jest para testes de componentes e hooks com mocks dos serviços.
+
+## Dificuldades encontradas
+
+- Dependências de teste: houve conflito de versões entre `react-test-renderer` e `@testing-library/react-native` que exigiu alinhar versões no `package.json`  para manter compatibilidade com React 19.1.0.
+
+
+## Melhorias futuras
+
+- Adicionar testes unitários e de integração mais abrangentes (mocks para serviços, testes de hooks com helpers como `renderHook`).
+- Configurar CI (GitHub Actions) para rodar lint, build e testes automaticamente.
+- Implementar validação de formulários (ex.: usando `zod` ou `yup`) e feedback de erros na UI.
+- Adicionar scripts de migração/versionamento para o schema SQLite e backups.
+
+
+## Estrutura do projeto
+
+- `app/` e `CadastroUsuarioApp/app/`: ponto de entrada com rotas (expo-router) e telas.
+- `src/models/`: interfaces `Usuario` e `Endereco`.
+- `src/services/`: funções que manipulam dados (usuário, endereço, viaCep).
+- `hooks/`: hooks reutilizáveis (ex.: `use-usuario`).
+- `components/`, `constants/`, `utils/`: UI, estilos e utilitários.
+
+---
+
+## Contato
+
+- Autor: [@paulohpssantos](https://github.com/paulohpssantos)
+- Email: paulo.henriquepsantos@gmail.com
