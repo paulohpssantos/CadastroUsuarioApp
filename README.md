@@ -23,7 +23,7 @@ CadastroUsuarioApp é um aplicativo de exemplo (mobile/web) para cadastro e gere
 1. Clone o repositório:
 
 ```bash
-git clone <repo-url>
+git clone <https://github.com/paulohpssantos/CadastroUsuarioApp.git>
 cd CadastroUsuarioApp
 ```
 
